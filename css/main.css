@@ -1,11 +1,8 @@
 /* 
-author: mohnish devadiga
+author: Mohnish Devadiga
 
 from https://coolors.co/00a6fb-0582ca-006494-003554-051923
-
-placeholder : #777
 */
-
 
 .body{
     height: 100%;
@@ -14,10 +11,19 @@ placeholder : #777
     background-attachment: fixed;
     background-color: #F1FAEE;
     background-image: linear-gradient(#051923, #006494);
-    /* background-image: url('https://images.unsplash.com/photo-1596171428701-3fca2768f81c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1001&q=80'); */
+    /* 
+    Removed background image as image gets resized with increasing lists
+    background-image: url('https://images.unsplash.com/photo-1596171428701-3fca2768f81c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1001&q=80'); 
+    */
     background-size: cover;
 }
 
+/* 
+main add container
+TODO:
+1. Try to curve edges
+2. Create linear effect on box
+*/
 .container-mod {
     /* background: #ffffff !important; */
     opacity: 0.95;
@@ -30,75 +36,86 @@ placeholder : #777
     background-image: linear-gradient(to right, rgba(255,255,255, 100), rgba(255,255,255, 50), rgba(255,255,255, 10), rgba(255,255,255, 5), rgba(255,255,255, 0.5));
 }
 
+/* 
+Placeholder color
+*/
+::placeholder {
+    color: #777;
+}
+
+/* Strike input box value once marked completed */
+.to_strike {
+    text-decoration: line-through;
+}
+
+/* 
+Task elements
+*/
+.box_main {
+    background-color: #fff;
+    padding: 2%;
+    height: 80px;
+    width: 100%;
+    border-radius: 20px;
+}
+
+/* 
+Generate toast message
+*/
+#toast {
+    visibility: hidden;
+    min-width: 25%;
+    margin-left: 25%;
+    margin-bottom: 50%;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 10px;
+    padding: 7px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 30px;
+    font-size: 15px;
+}
+  
+#toast.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+  
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;} 
+    to {bottom: 30px; opacity: 1;}
+}
+  
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+  
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;} 
+    to {bottom: 0; opacity: 0;}
+}
+  
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+/* 
+Section to modify/override materializecss (materializecss.com)
+*/
+
 /* override material css .nav-wrapper */
 .nav-wrapper {
     background: #051923 !important;
 }
 
-/* label underline focus color */
+/* input underline focus color */
 .row .input-field input:focus {
     border-bottom: 1px solid #457B9D !important;
     box-shadow: 0 1px 0 0 #457B9D !important
 }
-
-.textbox {
-    margin-right: -20px;
-    border-bottom: none;
-    outline: none;
-}
-
-.to_strike {
-    text-decoration: line-through;
-}
-
-
-/* updates from jquery ui */
-.ui-icon {
-    display: none !important;
-}
-
-.ui-state-default {
-    background: #ffffff !important;
-    border-color: #ffffff !important;
-    border-radius: 25px;
-    padding-left: 5%;
-    border: none !important;
-    opacity: 0.8 !important;
-}
-
-.ui-accordion-header {
-    padding-left: 5% !important;
-    padding-top: 1% !important;
-}
-
-::placeholder {
-    color: #777 !important;
-} 
-
-.ui-state-active {
-    background: #ffffff !important;
-    border-color: #ffffff !important;
-    border: none !important;
-    opacity: 1 !important;
-    border-radius: 20px 20px 0px 0px;
-    padding-left: 5%;
-    -webkit-transform: scale(1.1); /* Saf3.1+, Chrome */
-    -moz-transform: scale(1.1); /* FF3.5+ */
-    -ms-transform: scale(1.1); /* IE9 */
-    -o-transform: scale(1.1); /* Opera 10.5+ */
-    transform: scale(1.1);
-}
-
-.ui-accordion-content {
-    background: #ffffff;
-    border: none !important;
-    opacity: 1 !important;
-    margin-top: 1.5%;
-    border-radius: 0px 0px 20px 20px;
-    -webkit-transform: scale(1.1); /* Saf3.1+, Chrome */
-    -moz-transform: scale(1.1); /* FF3.5+ */
-    -ms-transform: scale(1.1); /* IE9 */
-    -o-transform: scale(1.1); /* Opera 10.5+ */
-    transform: scale(1.1);
-}
-
