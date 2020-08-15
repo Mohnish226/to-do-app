@@ -15,6 +15,8 @@ window.value = 1;
 
 // To keep a task of deleted tasks in the session
 var task_in_session = [];
+// To keep data of available task_areas
+var available_tasks = [];
 
 /* 
 ========================================================================= 
@@ -36,10 +38,11 @@ TODO:
 1.1. Press + button to add task
 */
 // Issue: on adding task, extra details in tasks get deleted
+// Solved: using available_tasks , add_text_area_details() and  localStorage 
 function add_task(extra_details = null, id = null){
-    // added optional parameters in order to accommodate control z feature
-    // Better alternative would be getting taskid from server
+    // added optional parameters in order to accommodate undo feature
     if (id === null){
+        // Better alternative would be getting taskid from server
         var i = window.value;
     }
     else{
@@ -63,7 +66,7 @@ function add_task(extra_details = null, id = null){
                 </div>
             </div>
         </h3>
-        <div id="content_`+i+`">
+        <div id="content_`+i+`" class="content_box">
             <div class="row">
                 <div class="col s10">
                 `;
@@ -86,6 +89,8 @@ function add_task(extra_details = null, id = null){
     document.getElementById('inp_task').value = "";
     // Toast message
     show_toast("Added: "+task);
+    available_tasks.push(i);
+    add_text_area_details();
 }
 
 /*
@@ -121,23 +126,31 @@ function remove_task(id){
 // Assuming 2 type of events occur
 // 'keyup paste' did not work so split them into 2 functions
 document.querySelector('body').addEventListener('keyup', function(event) {
-    if (event.target.id.toLowerCase().split("_")[0] === 'ip' || event.target.id.toLowerCase().split("_")[0] === 'textarea') {
+    handle_query(event);
+});
+document.querySelector('body').addEventListener('paste', function(event) {
+    handle_query(event);
+});
+
+
+function handle_query(event){
+    if (event.target.id.toLowerCase().split("_")[0] === 'ip') {
         task_mods(event.target.id, event.target.value);
+    }
+    if (event.target.id.toLowerCase().split("_")[0] === 'textarea') {
+        task_mods(event.target.id, event.target.value);
+        localStorage.setItem(event.target.id, event.target.value);
     }
     // Pressing Enter to add task
     if (event.keyCode === 13 && event.target.id.toLowerCase().split("_")[0] === 'inp') {
         add_task();
     }
-});
-document.querySelector('body').addEventListener('paste', function(event) {
-    if (event.target.id.toLowerCase().split("_")[0] === 'ip' || event.target.id.toLowerCase().split("_")[0] === 'textarea') {
-        task_mods(event.target.id, event.target.value);
-    }
-});
+}
 
-// Detect control + z in case of 
+// Detect control + z or command + z in case of undo
 document.querySelector('body').addEventListener('keydown', function(event) {
-    if (event.keyCode == 90 && event.ctrlKey){
+    // keycode for z is 90 and event.metaKey is true when pressing command key on mac
+    if ((event.keyCode === 90 && event.ctrlKey) || (event.keyCode == 90 && event.metaKey)){
         console.log("previous edited element was: "+task_in_session[0]);
         undo();
     }
@@ -189,4 +202,17 @@ function undo(){
     add_task(task_in_session[0][2], task_in_session[0][0]);
     // removing detail from task_in_session
     task_in_session.shift()    
+}
+
+// To save text area details
+function add_text_area_details(){
+    var i;
+    for (i = 0; i< available_tasks.length; i++){
+        document.getElementById('textarea_'+available_tasks[i]).value = localStorage.getItem('textarea_'+available_tasks[i]);
+    }
+}
+
+// populate task list when getting data from server
+function populate() {
+    
 }
