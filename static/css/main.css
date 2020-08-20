@@ -1,7 +1,7 @@
 /* 
 author: Mohnish Devadiga
 
-from https://coolors.co/00a6fb-0582ca-006494-003554-051923
+color palette from https://coolors.co/00a6fb-0582ca-006494-003554-051923
 */
 
 .body{
@@ -22,7 +22,7 @@ from https://coolors.co/00a6fb-0582ca-006494-003554-051923
 main add container
 TODO:
 1. Try to curve edges
-2. Create linear effect on box
+2. Create linear transparent effect on box
 */
 .container-mod {
     /* background: #ffffff !important; */
@@ -76,6 +76,7 @@ Task elements
     margin-bottom: 10px;
     opacity: 0.7;
 }
+
 .content_box:hover {
     background-color: #fff;
     padding: 5%;

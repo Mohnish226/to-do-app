@@ -10,27 +10,20 @@
         <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <!-- custom css -->
-        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     </head>
     <body class="body">
 
         <nav>
             <div class="nav-wrapper">
                 <a href="index.html" class="brand-logo">To-Do-App</a>
-                <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons fa fa-bars"></i></a>
-                <ul class="right hide-on-med-and-down">
+                <ul class="right">
                     <li><a href="index.html">Home</a></li>
                     <li><a href="#">Extra</a></li>
                 </ul>
             </div>
         </nav>
-
-        <ul class="sidenav" id="mobile-demo">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="#">Extra</a></li>
-        </ul>
             
-        
         <div class="row" style="height: 100px;">
         <!-- Blank space from navbar -->
         </div>
@@ -54,26 +47,6 @@
                 <div id="task_space"> 
 
                     <!-- Tasks go here -->
-                    <h3 id="head" class="box_main">
-                        <div class="row">
-                            <div class="col s11">
-                                <input id="ip" value="oo" class="textbox" style="z-index: -1; border-bottom: none; outline: none;" placeholder="Task has some details remove details to delete">
-                            </div>
-                            <div class="col s1">
-                                <button class="btn-floating waves-effect waves-light" style="background-color: red; margin-right: 10%;" onclick="remove_task(`+i+`)">x</button>
-                            </div>
-                        </div>
-                    </h3>
-                    <div id="content_`+i+`" class="content_box">
-                        <div class="row">
-                            <div class="col s10">
-                                <input id="textarea_`+i+`" class="textbox" styl="border: none !important;" placeholder="Add more details"></input>
-                            </div>
-                            <div class="col s2">
-                                extra
-                            </div>
-                        </div>
-                    </div>
 
                 </div>
             </div>
@@ -94,6 +67,6 @@
         <div id="toast"></div>
 
         <!-- Custom js -->
-        <script src="js/main.js"></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     </body>
 </html>

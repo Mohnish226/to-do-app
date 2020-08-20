@@ -14,22 +14,51 @@ Init
 window.value = 1;
 
 // To keep a task of deleted tasks in the session
-var task_in_session = [];
+// array of array [[id, task details, more details], ...]
+var deleted_task_stack = [];
+
 // To keep data of available task_areas
+// array to store id of tasks, used in localstorage of extra details
 var available_tasks = [];
+var session_id = 0;
+
+try {
+    if(typeof(Storage) !== "undefined") {
+        if (sessionStorage.to_do_app) {
+            console.log("Session exists");
+            session_id = sessionStorage.to_do_app;
+            console.log(session_id);
+            // sessionStorage.clear();
+        } else {
+            // Get from server
+            console.log("Session Generted");
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", `http://127.0.0.1:5000/user/""/""/`, false);
+            xmlHttp.send( null );
+            sessionStorage.to_do_app  = xmlHttp.responseText;
+            session_id = sessionStorage.to_do_app
+            console.log(session_id);
+        }
+    } else {
+        show_toast("Browser not supported");
+    }
+}
+catch(err) {
+    console.log(err)
+}
 
 /* 
 ========================================================================= 
 Basic Operations
 TODO:
-1. Add Tasks                                        -done   11/Aug/2020
-    1.1 Press + button to add task                  -done   11/Aug/2020
-    1.2 Press enter to add task                     -done   11/Aug/2020
-2. Remove tasks                                     -done   11/Aug/2020
-    2.1 Press x to delete task                      -done   12/Aug/2020
-    2.2 Erase task to delete task                   -done   12/Aug/2020
+1. Add Tasks                                       
+    1.1 Press + button to add task                 
+    1.2 Press enter to add task                    
+2. Remove tasks                                     
+    2.1 Press x to delete task                     
+    2.2 Erase task to delete task                   
     (delete task only if details of task is empty)
-3. Update tasks                                     -done   12/Aug/2020
+3. Update tasks                                     
 =========================================================================
 */
 
@@ -58,15 +87,18 @@ function add_task(extra_details = null, id = null){
     var newTask = `
         <h3 id="head_`+i+`" class="box_main">
             <div class="row">
-                <div class="col s11">
+                <div class="col s10">
                     <input id="ip_`+i+`" value="`+task+`" class="textbox" style="z-index: -1; border-bottom: none; outline: none;" placeholder="Task has some details remove details to delete">
+                </div>
+                <div class="col s1">
+                    <button class="btn-floating waves-effect waves-light" style="background-color: #006494; margin-right: 10%;" onclick="show_details(`+i+`)"><i class="fa fa-angle-down" aria-hidden="true"></i></button>
                 </div>
                 <div class="col s1">
                     <button class="btn-floating waves-effect waves-light" style="background-color: red; margin-right: 10%;" onclick="remove_task(`+i+`)">x</button>
                 </div>
             </div>
         </h3>
-        <div id="content_`+i+`" class="content_box">
+        <div id="content_`+i+`" class="content_box" style="display: none;">
             <div class="row">
                 <div class="col s10">
                 `;
@@ -98,8 +130,8 @@ function add_task(extra_details = null, id = null){
 */
 function remove_task(id){
     var task_data = [id, document.getElementById('ip_'+id).value, document.getElementById('textarea_'+id).value];
-    task_in_session.unshift(task_data);
-    console.log(task_in_session);
+    deleted_task_stack.unshift(task_data);
+    console.log(deleted_task_stack);
     console.log('removing task: '+id);
     // Toast message
     var toast_data = document.getElementById('ip_'+id).value;
@@ -119,7 +151,6 @@ function remove_task(id){
     }
 }
 
-
 /* 
 3. Update tasks
 */
@@ -131,7 +162,6 @@ document.querySelector('body').addEventListener('keyup', function(event) {
 document.querySelector('body').addEventListener('paste', function(event) {
     handle_query(event);
 });
-
 
 function handle_query(event){
     if (event.target.id.toLowerCase().split("_")[0] === 'ip') {
@@ -146,16 +176,6 @@ function handle_query(event){
         add_task();
     }
 }
-
-// Detect control + z or command + z in case of undo
-document.querySelector('body').addEventListener('keydown', function(event) {
-    // keycode for z is 90 and event.metaKey is true when pressing command key on mac
-    if ((event.keyCode === 90 && event.ctrlKey) || (event.keyCode == 90 && event.metaKey)){
-        console.log("previous edited element was: "+task_in_session[0]);
-        undo();
-    }
-});
-
 
 // Get modifications of tasks
 function task_mods(task_id, data){
@@ -180,6 +200,41 @@ function task_mods(task_id, data){
     }
 }
 
+/* 
+========================================================================= 
+Extra features
+1. Undo feature
+2. Detect control+z pr command + z for undo           
+3. Toast popup on changes of text
+4. Save data of textarea in browser local storage which caused problem
+   during refresh / adding of element [still exists sometimes not sure why]
+5. Show or hide extra details area             
+=========================================================================
+*/
+
+// Undo function
+function undo(){
+    if (deleted_task_stack.length === 0) {
+        show_toast("No Task to Undo!");
+        return;
+    }
+    // Add task main details in input
+    document.getElementById('inp_task').value = deleted_task_stack[0][1];
+    // Add task extra details and task id
+    add_task(deleted_task_stack[0][2], deleted_task_stack[0][0]);
+    // removing detail from deleted_task_stack
+    deleted_task_stack.shift()    
+}
+
+// Detect control + z or command + z in case of undo
+document.querySelector('body').addEventListener('keydown', function(event) {
+    // keycode for z is 90 and event.metaKey is true when pressing command key on mac
+    if ((event.keyCode === 90 && event.ctrlKey) || (event.keyCode == 90 && event.metaKey)){
+        console.log("previous edited element was: "+deleted_task_stack[0]);
+        undo();
+    }
+});
+
 // toast
 function show_toast(text) {
     var toast = document.getElementById("toast");
@@ -190,29 +245,39 @@ function show_toast(text) {
     4000);
 }
 
-// Undo function
-function undo(){
-    if (task_in_session.length === 0) {
-        show_toast("No Task to Undo!");
-        return;
-    }
-    // Add task main details in input
-    document.getElementById('inp_task').value = task_in_session[0][1];
-    // Add task extra details and task id
-    add_task(task_in_session[0][2], task_in_session[0][0]);
-    // removing detail from task_in_session
-    task_in_session.shift()    
-}
-
 // To save text area details
 function add_text_area_details(){
+    if (available_tasks.length < 1){
+        return;
+    }
+    console.log("tasks :"+ available_tasks)
     var i;
     for (i = 0; i< available_tasks.length; i++){
+        console.log(localStorage.getItem('textarea_'+available_tasks[i]));
         document.getElementById('textarea_'+available_tasks[i]).value = localStorage.getItem('textarea_'+available_tasks[i]);
     }
+}
+
+// To show or hide content box
+function show_details(id){
+    var content = document.getElementById("content_"+id);
+    if (content.style.display === "none") {
+        content.style.display = "block";
+        return;
+    }
+    content.style.display = "none";     
 }
 
 // populate task list when getting data from server
 function populate() {
     
 }
+
+// Save / Send data to verify every 30 seconds
+// Not sure if good idea
+/*
+setInterval(function(){ 
+    // function that runs every 30 seconds
+    console.log("To be saved");
+}, 30000);
+*/
