@@ -32,7 +32,8 @@ try {
             }
         } else {
             // Get from server
-            var api_and_window = get_fetch_server(1).split("|");
+            // Receive "API-key|next_task_id"
+            var api_and_window = get_post_server(1).split("|");
             sessionStorage.to_do_app  = api_and_window[0];
             window.value = Number(api_and_window[1]);
             session_id = sessionStorage.to_do_app;
@@ -115,6 +116,7 @@ function add_task(extra_details = null, id = null){
         </div>
     `;
     document.getElementById('task_space').innerHTML = prev + newTask;
+    get_post_server(type = 2, id = i, task = task)
     window.value = window.value + 1;
     document.getElementById('inp_task').value = "";
     // Toast message
@@ -268,8 +270,9 @@ function show_details(id){
 }
 
 // populate task list when getting data from server
-function populate() {
-    
+function populate(all_tasks) {
+    console.log(all_tasks);
+    console.log(all_tasks.length);
 }
 
 // Save / Send data to verify every 30 seconds
@@ -281,11 +284,33 @@ setInterval(function(){
 }, 30000);
 */
 
-function get_fetch_server(type, id=null, data=null){
+function get_post_server(type, id=null, task=null, task_details=null){
     if (type === 1){
+        // Get session details from flask
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", `http://127.0.0.1:5000/user/""/""/`, false);
         xmlHttp.send(null);
         return xmlHttp.responseText;
+    }
+    if (type === 2){
+        // Send task to flask
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/task?id=" + id + "&t=" + task, false);
+        xmlHttp.send(null);
+        if (xmlHttp.responseText !== 'ok'){
+            // if error send again
+            get_post_server(type=type, id=id, task=task);
+        }
+    }
+    if (type === 3){
+        // Modify tasks
+        return
+    }
+    if (type === 4){
+        // Get all task from flask
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/all", false);
+        xmlHttp.send(null);
+        populate(xmlHttp.responseText);
     }
 }

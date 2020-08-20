@@ -26,9 +26,14 @@ def generate_api_key():
 
 def api_task_id(api):
     # logic to get task id for API key from database
-    value = 100
+    value = 0
     return value+1
+
 
 def api_present(api_key):
     # Check database if api key is present
     return False
+
+
+def get_all_tasks(api_key):
+    return True

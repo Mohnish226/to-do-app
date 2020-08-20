@@ -26,9 +26,16 @@ def update_task(api_key, task_id):
     example:
     /api/2bca68ef-16ba-4a14-aa47-ea85e1e7dcb6/123/det?m="task1"&d="details1"                  
     """
-    main = request.args.get('m', None)
+    print("called")
     details = request.args.get('d', None)
-    print("Api key: {}\n Task ID: {}\n Task data: {}\n Task Details: {}".format(api_key, task_id, main, details))
+
+    try:
+        task_data[task_id]["details"] = details
+    except:
+        # Does not exist
+        return 'error'
+
+    print(task_data)
     return 'ok'
 
 
@@ -39,10 +46,26 @@ def new_task(api_key):
     Args:
         api_key ([type]): [description]
     """
+    task_id = request.args.get('id', None)
     task = request.args.get('t', None)
-    print("in")
-    print(task)
-    return 
+
+    task_data[task_id] = {"task": task}
+
+    print(task_data)
+    return 'ok'
+
+
+@app.route('/api/<api_key>/all', methods=['GET'])
+def get_all_tasks(api_key):
+    """ get_all_tasks
+
+    Args:
+        api_key (str): Api Key
+
+    Returns:
+        all_tasks : Json of all tasks available
+    """
+    return jsonify(task_data)
 
 
 @app.route('/user/<username>/<password>/', methods=['GET'])
