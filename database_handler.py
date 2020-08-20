@@ -4,8 +4,7 @@ import uuid
 def check_generate_api(username, password):
     api = validate_user(username, password)
     if api != None:
-        # return the api key of the user
-        pass
+        return api
     return generate_api_key()
 
 
@@ -22,8 +21,13 @@ def generate_api_key():
     # Check if generated Api is available in database
     while(api_present(generated_id)):
         generated_id = str(uuid.uuid4())
-    return generated_id
+    return str(generated_id) + "|" + str(api_task_id(generated_id))
 
+
+def api_task_id(api):
+    # logic to get task id for API key from database
+    value = 100
+    return value+1
 
 def api_present(api_key):
     # Check database if api key is present

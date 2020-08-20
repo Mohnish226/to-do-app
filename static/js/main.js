@@ -25,26 +25,24 @@ var session_id = 0;
 try {
     if(typeof(Storage) !== "undefined") {
         if (sessionStorage.to_do_app) {
-            console.log("Session exists");
             session_id = sessionStorage.to_do_app;
-            console.log(session_id);
             // sessionStorage.clear();
+            if (sessionStorage.to_do_app_value){
+                window.value = Number(sessionStorage.to_do_app_value);
+            }
         } else {
             // Get from server
-            console.log("Session Generted");
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open( "GET", `http://127.0.0.1:5000/user/""/""/`, false);
-            xmlHttp.send( null );
-            sessionStorage.to_do_app  = xmlHttp.responseText;
-            session_id = sessionStorage.to_do_app
-            console.log(session_id);
+            var api_and_window = get_fetch_server(1).split("|");
+            sessionStorage.to_do_app  = api_and_window[0];
+            window.value = Number(api_and_window[1]);
+            session_id = sessionStorage.to_do_app;
         }
     } else {
-        show_toast("Browser not supported");
+        show_toast("Browser does not support session");
     }
 }
 catch(err) {
-    console.log(err)
+    show_toast(err);
 }
 
 /* 
@@ -123,6 +121,7 @@ function add_task(extra_details = null, id = null){
     show_toast("Added: "+task);
     available_tasks.push(i);
     add_text_area_details();
+    sessionStorage.to_do_app_value = window.value;
 }
 
 /*
@@ -281,3 +280,12 @@ setInterval(function(){
     console.log("To be saved");
 }, 30000);
 */
+
+function get_fetch_server(type, id=null, data=null){
+    if (type === 1){
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", `http://127.0.0.1:5000/user/""/""/`, false);
+        xmlHttp.send(null);
+        return xmlHttp.responseText;
+    }
+}
