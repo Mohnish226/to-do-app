@@ -1,5 +1,6 @@
 import uuid
 
+task_data = {'1': {'task': 'task 1', 'details': None}}
 
 def check_generate_api(username, password):
     api = validate_user(username, password)
@@ -36,4 +37,38 @@ def api_present(api_key):
 
 
 def get_all_tasks(api_key):
+    # Logic to get task database
+    return task_data
+
+
+def add_task_details(api_key, task_id, task_main, task_extra=""):
+    # Logic to add task into database
+
+    task_data[task_id] = {"task": task_main, "details": task_extra}
+
     return True
+
+
+def update_task_details(api_key, task_id, task_main=None, task_extra=None):
+    # Logic to update task details
+
+    if task_id and task_main:
+        task_data[task_id]["task"] = task_main
+    elif task_id and task_extra:
+        task_data[task_id]["details"] = task_extra
+    else:
+        print("Error!!!!")
+        return False
+    print(task_data)
+    return True
+
+
+def delete_task(api_key, task_id):
+    # Logic to delete task
+
+    try:
+        del task_data[task_id]
+        return True
+    except Exception as e:
+        print(e)
+        return False

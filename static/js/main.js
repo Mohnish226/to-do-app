@@ -5,12 +5,24 @@ Author: Mohnish Devadiga
 
 /*
 =========================================================================
-Init
+ISSUE: 
+    1. If any data was present in previous extra details (dropdown) box
+       it would get cleared when adding new task
+    2. Typing lags
 =========================================================================
 */
 
-//To keep a track of todo lists in a window
-// TODO: Check with sessions so that they work crosstab
+/*
+=========================================================================
+1 Initial task
+    1.1 window.value       : keep a track of tasks in a window / session
+    1.2 deleted_task_stack : Keep a track of deleted tasks [stack of deleted tasks] (used for undo feature)
+    1.3 available_tasks    : keep a track of available tasks
+    1.4 session_id         : Unique ID generated for every session (used for login feature[Not Yet Implemented]) 
+=========================================================================
+*/
+
+// To keep a track of todo lists in a window
 window.value = 1;
 
 // To keep a task of deleted tasks in the session
@@ -22,9 +34,11 @@ var deleted_task_stack = [];
 var available_tasks = [];
 var session_id = 0;
 
+// Check for session
 try {
     if(typeof(Storage) !== "undefined") {
         if (sessionStorage.to_do_app) {
+            // Session is present
             session_id = sessionStorage.to_do_app;
             // sessionStorage.clear();
             if (sessionStorage.to_do_app_value){
@@ -49,40 +63,41 @@ catch(err) {
 
 /* 
 ========================================================================= 
-Basic Operations
-TODO:
-1. Add Tasks                                       
-    1.1 Press + button to add task                 
-    1.2 Press enter to add task                    
-2. Remove tasks                                     
-    2.1 Press x to delete task                     
-    2.2 Erase task to delete task                   
-    (delete task only if details of task is empty)
-3. Update tasks                                     
+2 Basic Operations
+    2.1 Add Tasks                                       
+        2.1.1 Press + button to add task                 
+        2.1.2 Press enter to add task                    
+    2.2. Remove tasks                                     
+        2.2.1 Press x to delete task                     
+        2.2.2 Erase task to delete task                   
+        (delete task only if details of task is empty)
+    2.3. Update tasks       
 =========================================================================
 */
 
-/*
-1.   Adding task
-1.1. Press + button to add task
-*/
-// Issue: on adding task, extra details in tasks get deleted
-// Solved: using available_tasks , add_text_area_details() and  localStorage 
+
+/**
+ * Adding a task.
+ * Optional parameters used when populating tasks from server and undo feature
+ * @param {string} extra_details - Extra details needed for a task 
+ * @param {Number} id - ID of the task
+ */
 function add_task(extra_details = null, id = null){
-    // added optional parameters in order to accommodate undo feature
     if (id === null){
-        // Better alternative would be getting taskid from server
+        // Task was given by user
         var i = window.value;
     }
     else{
+        // Task was inserted by Undo / received from server
         var i = id;
     }
+    // Getting main
     var task = document.getElementById('inp_task').value;
     if (task === ""){
-        // Toast message
         show_toast("Task Empty!"+task);
         return;
     }
+    // Adding new task to html
     var prev = document.getElementById('task_space').innerHTML;
     var newTask = `
         <h3 id="head_`+i+`" class="box_main">
@@ -117,39 +132,51 @@ function add_task(extra_details = null, id = null){
         </div>
     `;
     document.getElementById('task_space').innerHTML = prev + newTask;
+    // Sending data to server
     if (extra_details === null){   
         get_post_server(type = 2, id = i, task = task)
     }
     else{
         get_post_server(type = 2, id = i, task = task, task_details = extra_details);
     }
+    // Increment counter
     window.value = window.value + 1;
+    // Clearing input space
     document.getElementById('inp_task').value = "";
     // Toast message
     show_toast("Added: "+task);
+    // Appending current task to available_task list
     available_tasks.push(i);
+    // Used to fix ISSUE: 1
     if (extra_details === null){
         add_text_area_details();
     }
     else{
-        // Adding value of text area so 
-        // It does not dissapear when adding new tasks
         localStorage.setItem("textarea_"+i, extra_details);
     }
     sessionStorage.to_do_app_value = window.value;
 }
 
-/*
-2. Remove tasks
-*/
+
+/**
+ * Removing a task.
+ * @param {Number} id - ID of the task
+ */
 function remove_task(id){
-    var task_data = [id, document.getElementById('ip_'+id).value, document.getElementById('textarea_'+id).value];
+    var task_data = [
+                    id, 
+                    document.getElementById('ip_'+id).value, 
+                    document.getElementById('textarea_'+id).value
+                ];
+    // Inserting to deleted_task_stack for Undo
     deleted_task_stack.unshift(task_data);
-    // console.log(deleted_task_stack);
-    // console.log('removing task: '+id);
     // Toast message
     var toast_data = document.getElementById('ip_'+id).value;
+    /*
+    // To Strike the task and add to end of list 
+    // Not implemented
     document.getElementById("ip_"+id).classList.toggle("to_strike");
+    */
     if (toast_data === ""){
         show_toast("Removing Empty task");
     }
@@ -160,17 +187,18 @@ function remove_task(id){
     var elements_2_delete = ["head_", "content_"];
     var i;
     for (i = 0; i< elements_2_delete.length; i++) {
-        // console.log(elements_2_delete[i]+id);
-        document.getElementById(elements_2_delete[i]+id).parentNode.removeChild(document.getElementById(elements_2_delete[i]+id));
+        document.getElementById( elements_2_delete[i]+id ).parentNode.removeChild(document.getElementById(elements_2_delete[i]+id));
     }
     get_post_server(type=5, id=id);
 }
 
-/* 
-3. Update tasks
-*/
-// Assuming 2 type of events occur
-// 'keyup paste' did not work so split them into 2 functions
+
+/**
+ * Event Listner for inputs:
+ * 1. Key up 
+ * 2. Paste text
+ * 'keyup paste' did not work so split them into 2 listners
+ */
 document.querySelector('body').addEventListener('keyup', function(event) {
     handle_query(event);
 });
@@ -178,21 +206,38 @@ document.querySelector('body').addEventListener('paste', function(event) {
     handle_query(event);
 });
 
+
+/**
+ * Handling input actions.
+ */
 function handle_query(event){
     if (event.target.id.toLowerCase().split("_")[0] === 'ip') {
+        // Input was in the main task area
         task_mods(event.target.id, event.target.value);
     }
     if (event.target.id.toLowerCase().split("_")[0] === 'textarea') {
+        // Input was in the extra details for a task
         task_mods(event.target.id, event.target.value);
+        // Used to fix ISSUE: 1
         localStorage.setItem(event.target.id, event.target.value);
     }
     // Pressing Enter to add task
-    if (event.keyCode === 13 && event.target.id.toLowerCase().split("_")[0] === 'inp') {
+    if (event.keyCode === 13 
+        && event.target.id.toLowerCase().split("_")[0] === 'inp') {
         add_task();
     }
 }
 
-// Get modifications of tasks
+
+/**
+ * Modifying a task.
+ * @param {string} task_id - element that has to me modfied with ID
+ *                     in the format '<section>_<id>'
+ *                     types of <section>:
+ *                     'ip' : main task details
+ *                     'text_area' : extra task details
+ *  @param {string} data - the current data in the input
+ */
 function task_mods(task_id, data){
     // Detecting empty task and details
     if (data == ''){
@@ -207,7 +252,6 @@ function task_mods(task_id, data){
             }
         }
         else{
-            show_toast("")
             console.log('won\'t delete as something in task area');
         }
     }
@@ -216,7 +260,7 @@ function task_mods(task_id, data){
         var id_ = task_id.split("_")[1];
         var task_or_detail = task_id.split("_")[0];
         if (task_or_detail === "textarea"){
-            get_post_server(type=3, id=id_, task_details=data);
+            get_post_server(type=3, id=id_, task=null, task_details=data);
         }
         else{
             if (task_or_detail === "ip"){
@@ -226,19 +270,23 @@ function task_mods(task_id, data){
     }
 }
 
+
 /* 
 ========================================================================= 
-Extra features
-1. Undo feature
-2. Detect control+z pr command + z for undo           
-3. Toast popup on changes of text
-4. Save data of textarea in browser local storage which caused problem
-   during refresh / adding of element [still exists sometimes not sure why]
-5. Show or hide extra details area             
+3 Extra features
+    3.1. Undo feature
+    3.2. Detect control+z pr command + z for undo           
+    3.3. Toast popup on changes of text
+    3.4. Save data of textarea in browser local storage which caused problem
+        during refresh / adding of element [still exists sometimes not sure why]
+    3.5. Show or hide extra details area             
 =========================================================================
 */
 
-// Undo function
+
+/**
+ * Undo deletion of a task.
+ */
 function undo(){
     if (deleted_task_stack.length === 0) {
         show_toast("No Task to Undo!");
@@ -252,16 +300,21 @@ function undo(){
     deleted_task_stack.shift()    
 }
 
+
 // Detect control + z or command + z in case of undo
 document.querySelector('body').addEventListener('keydown', function(event) {
     // keycode for z is 90 and event.metaKey is true when pressing command key on mac
-    if ((event.keyCode === 90 && event.ctrlKey) || (event.keyCode == 90 && event.metaKey)){
+    if ( (event.keyCode === 90 && event.ctrlKey) 
+            || (event.keyCode == 90 && event.metaKey) ) {
         // console.log("previous edited element was: "+deleted_task_stack[0]);
         undo();
     }
 });
 
-// toast
+/**
+ * Display a Toast / Notification.
+ * @param {string} text - Text in Notification / Toast
+ */
 function show_toast(text) {
     var toast = document.getElementById("toast");
     toast.innerHTML = text;
@@ -271,20 +324,26 @@ function show_toast(text) {
     4000);
 }
 
-// To save text area details
+
+/**
+ * Keep extra details of task on page
+ * Used to solve ISSUE: 1
+ */
 function add_text_area_details(){
     if (available_tasks.length < 1){
         return;
     }
-    // console.log("tasks :"+ available_tasks)
     var i;
     for (i = 0; i< available_tasks.length; i++){
-        // console.log(localStorage.getItem('textarea_'+available_tasks[i]));
+        // Storing extra details in local browser storage
         document.getElementById('textarea_'+available_tasks[i]).value = localStorage.getItem('textarea_'+available_tasks[i]);
     }
 }
 
-// To show or hide content box
+/**
+ * Show / Hide dropdown details that contain extra details
+ * @param {string} id - Task ID to show extra task information
+ */
 function show_details(id){
     var content = document.getElementById("content_"+id);
     if (content.style.display === "none") {
@@ -294,10 +353,13 @@ function show_details(id){
     content.style.display = "none";     
 }
 
-// populate task list when getting data from server
+/**
+ * Populate Tasks if session data was present
+ * @param {Object} all_tasks - Json data of all tasks received 
+ *                             server to display on screen
+ */
 function populate(all_tasks) {
     for (var id_tasks in all_tasks){
-        // console.log(id_tasks);
         try{
             // check if details available
             var task_name = all_tasks[id_tasks]['task'];
@@ -313,15 +375,35 @@ function populate(all_tasks) {
     }
 }
 
-// Save / Send data to verify every 30 seconds
-// Not sure if good idea
-/*
-setInterval(function(){ 
-    // function that runs every 30 seconds
-    console.log("To be saved");
-}, 30000);
+/* 
+========================================================================= 
+4 Flask Interaction
+    4.1 Get session
+    4.2 Add Task
+    4.3 Modify Task details
+    4.4 Get All Tasks in a session
+    4.5 Delete Task
+=========================================================================
 */
 
+
+/**
+ * Interaction with the server
+ * @param {int} type - Operation you want to perform
+ *       1 : Get Session from server (Default)
+ *       2 : Create Task and send to server (requires id, task and or task_details)
+ *       3 : Modify Present task and send to server (requires id, task and or task_details)
+ *       4 : Get all task from server in case Login (Not yet implemented)
+ *       5 : Delete present task from server (requires id)
+ * Optional:
+ * @param {int} id - Task ID
+ * @param {string} task - Task main details
+ * @param {string} task_details - Task extra details
+ * 
+ * NOTE: Server return codes:
+ * 'ok'     : Success
+ * 'error'  : Something went wrong (check logs)
+ */
 function get_post_server(type, id=null, task=null, task_details=null){
     if (type === 1){
         // Get session details from flask
@@ -348,11 +430,11 @@ function get_post_server(type, id=null, task=null, task_details=null){
     if (type === 3){
         // Modify tasks
         var xmlHttp = new XMLHttpRequest();
-        if (task === null && task_details !== null){
+        if (task === null && task_details != null){
             xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/"+ id + "/det?d=" + task_details, false);
         }
         else{
-            if (task !== null && task_details === null){
+            if (task != null && task_details === null){
                 xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/"+ id + "/det?t=" + task, false);
             }
             else{
@@ -383,3 +465,12 @@ function get_post_server(type, id=null, task=null, task_details=null){
         }
     }
 }
+
+// Save / Send data to verify every 30 seconds
+// Not sure if good idea
+/*
+setInterval(function(){ 
+    // function that runs every 30 seconds
+    console.log("To be saved");
+}, 30000);
+*/
