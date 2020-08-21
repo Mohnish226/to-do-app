@@ -40,7 +40,7 @@ def update_task(api_key, task_id):
     return 'ok'
 
 
-@app.route('/api/<api_key>/task',  methods=['GET', 'POST', 'PUT'])
+@app.route('/api/<api_key>/task',  methods=['POST'])
 def new_task(api_key):
     """ new_task
 
@@ -77,7 +77,7 @@ def get_all_tasks(api_key):
     return jsonify(all_task)
 
 
-@app.route('/api/<api_key>/delete/<task_id>',  methods=['GET', 'POST', 'PUT'])
+@app.route('/api/<api_key>/delete/<task_id>',  methods=['GET'])
 def delete_task(api_key, task_id):
     """ delete_task
     Args:
@@ -88,9 +88,10 @@ def delete_task(api_key, task_id):
         'ok'    : Task executed
         'error' : Something went wrong
     """
-    database_handler.delete_task(api_key, task_id)
-
-    return 'ok'
+    if (database_handler.delete_task(api_key, task_id)):
+        return 'ok'
+    else:
+        return 'error'
 
 @app.route('/user/<username>/<password>/', methods=['GET'])
 def profile(username, password):
