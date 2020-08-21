@@ -6,7 +6,7 @@ app = Flask(__name__)
 main_url = 'http://127.0.0.1:5000/'
 
 
-task_data = {}
+task_data = {'1': {'task': 'task 1', 'details': None}}
 
 @app.errorhandler(404)
 def page_not_found_404(e):
@@ -20,21 +20,33 @@ def page_not_found(e):
 
 @app.route('/api/<api_key>/<task_id>/det',  methods=['GET', 'POST', 'PUT'])
 def update_task(api_key, task_id):
+    """ update_task
+
+    Args:
+        api_key (str): Api Key
+        task_id (int): ID of the task for the api
+
+    Returns:
+        'ok'    : Task executed
+        'error' : Something went wrong
+    """
     """
     Data sent in the format
-    /api/api-key/task-id/det?m="Main task details"&d="Extra task details"
+    /api/api-key/task-id/det?d=Extra task details
     example:
-    /api/2bca68ef-16ba-4a14-aa47-ea85e1e7dcb6/123/det?m="task1"&d="details1"                  
+    /api/2bca68ef-16ba-4a14-aa47-ea85e1e7dcb6/123/det?d=extra details                 
     """
-    print("called")
     details = request.args.get('d', None)
-
-    try:
+    task_name = request.args.get('t', None)
+    print(details, " - ", task_name)
+    if details:
+        print(details)
         task_data[task_id]["details"] = details
-    except:
-        # Does not exist
+    elif task_name:
+        print(task_name)
+        task_data[task_id]["task"] = task_name
+    else:
         return 'error'
-
     print(task_data)
     return 'ok'
 
@@ -44,14 +56,17 @@ def new_task(api_key):
     """ new_task
 
     Args:
-        api_key ([type]): [description]
+        api_key (str): Api Key
+
+    Returns:
+        'ok'    : Task executed
+        'error' : Something went wrong
     """
     task_id = request.args.get('id', None)
     task = request.args.get('t', None)
+    d = request.args.get('d', '')
+    task_data[task_id] = {"task": task, "details": d}
 
-    task_data[task_id] = {"task": task}
-
-    print(task_data)
     return 'ok'
 
 
@@ -67,6 +82,24 @@ def get_all_tasks(api_key):
     """
     return jsonify(task_data)
 
+
+@app.route('/api/<api_key>/delete/<task_id>',  methods=['GET', 'POST', 'PUT'])
+def delete_task(api_key, task_id):
+    """ delete_task
+    Args:
+        api_key (str): Api Key
+        task_id (int): ID of the task for the api
+
+    Returns:
+        'ok'    : Task executed
+        'error' : Something went wrong
+    """
+    print(task_id)
+    print(task_data)
+    del task_data[task_id]
+    print(task_data)
+
+    return 'ok'
 
 @app.route('/user/<username>/<password>/', methods=['GET'])
 def profile(username, password):

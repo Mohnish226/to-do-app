@@ -30,6 +30,7 @@ try {
             if (sessionStorage.to_do_app_value){
                 window.value = Number(sessionStorage.to_do_app_value);
             }
+            get_post_server(type=4);
         } else {
             // Get from server
             // Receive "API-key|next_task_id"
@@ -116,13 +117,25 @@ function add_task(extra_details = null, id = null){
         </div>
     `;
     document.getElementById('task_space').innerHTML = prev + newTask;
-    get_post_server(type = 2, id = i, task = task)
+    if (extra_details === null){   
+        get_post_server(type = 2, id = i, task = task)
+    }
+    else{
+        get_post_server(type = 2, id = i, task = task, task_details = extra_details);
+    }
     window.value = window.value + 1;
     document.getElementById('inp_task').value = "";
     // Toast message
     show_toast("Added: "+task);
     available_tasks.push(i);
-    add_text_area_details();
+    if (extra_details === null){
+        add_text_area_details();
+    }
+    else{
+        // Adding value of text area so 
+        // It does not dissapear when adding new tasks
+        localStorage.setItem("textarea_"+i, extra_details);
+    }
     sessionStorage.to_do_app_value = window.value;
 }
 
@@ -132,8 +145,8 @@ function add_task(extra_details = null, id = null){
 function remove_task(id){
     var task_data = [id, document.getElementById('ip_'+id).value, document.getElementById('textarea_'+id).value];
     deleted_task_stack.unshift(task_data);
-    console.log(deleted_task_stack);
-    console.log('removing task: '+id);
+    // console.log(deleted_task_stack);
+    // console.log('removing task: '+id);
     // Toast message
     var toast_data = document.getElementById('ip_'+id).value;
     document.getElementById("ip_"+id).classList.toggle("to_strike");
@@ -150,6 +163,7 @@ function remove_task(id){
         // console.log(elements_2_delete[i]+id);
         document.getElementById(elements_2_delete[i]+id).parentNode.removeChild(document.getElementById(elements_2_delete[i]+id));
     }
+    get_post_server(type=5, id=id);
 }
 
 /* 
@@ -188,16 +202,27 @@ function task_mods(task_id, data){
                 remove_task(id);
             }
             else{
-                console.log('cannot delete as something in details area');
+                show_toast('Cannot delete as something in details area');
+                console.log('Cannot delete as something in details area');
             }
         }
         else{
+            show_toast("")
             console.log('won\'t delete as something in task area');
         }
     }
     else{
         // update task and data  
-        console.log(task_id+' - '+data);
+        var id_ = task_id.split("_")[1];
+        var task_or_detail = task_id.split("_")[0];
+        if (task_or_detail === "textarea"){
+            get_post_server(type=3, id=id_, task_details=data);
+        }
+        else{
+            if (task_or_detail === "ip"){
+                get_post_server(type=3, id=id_, task=data);
+            }
+        }
     }
 }
 
@@ -231,7 +256,7 @@ function undo(){
 document.querySelector('body').addEventListener('keydown', function(event) {
     // keycode for z is 90 and event.metaKey is true when pressing command key on mac
     if ((event.keyCode === 90 && event.ctrlKey) || (event.keyCode == 90 && event.metaKey)){
-        console.log("previous edited element was: "+deleted_task_stack[0]);
+        // console.log("previous edited element was: "+deleted_task_stack[0]);
         undo();
     }
 });
@@ -251,10 +276,10 @@ function add_text_area_details(){
     if (available_tasks.length < 1){
         return;
     }
-    console.log("tasks :"+ available_tasks)
+    // console.log("tasks :"+ available_tasks)
     var i;
     for (i = 0; i< available_tasks.length; i++){
-        console.log(localStorage.getItem('textarea_'+available_tasks[i]));
+        // console.log(localStorage.getItem('textarea_'+available_tasks[i]));
         document.getElementById('textarea_'+available_tasks[i]).value = localStorage.getItem('textarea_'+available_tasks[i]);
     }
 }
@@ -271,8 +296,21 @@ function show_details(id){
 
 // populate task list when getting data from server
 function populate(all_tasks) {
-    console.log(all_tasks);
-    console.log(all_tasks.length);
+    for (var id_tasks in all_tasks){
+        // console.log(id_tasks);
+        try{
+            // check if details available
+            var task_name = all_tasks[id_tasks]['task'];
+            var details = all_tasks[id_tasks]['details'];
+        }
+        catch(err){
+            var task_name = all_tasks[id_tasks]['task'];
+            var details = null;
+        }
+        console.log(id_tasks + " " + task_name + " " + details);
+        document.getElementById('inp_task').value = task_name;
+        add_task(extra_details = details, id = Number(id_tasks));
+    }
 }
 
 // Save / Send data to verify every 30 seconds
@@ -295,7 +333,12 @@ function get_post_server(type, id=null, task=null, task_details=null){
     if (type === 2){
         // Send task to flask
         var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/task?id=" + id + "&t=" + task, false);
+        if (task_details === null){
+            xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/task?id=" + id + "&t=" + task, false);
+        }
+        else{
+            xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/task?id=" + id + "&t=" + task + "&d=" + task_details , false);
+        }
         xmlHttp.send(null);
         if (xmlHttp.responseText !== 'ok'){
             // if error send again
@@ -304,13 +347,39 @@ function get_post_server(type, id=null, task=null, task_details=null){
     }
     if (type === 3){
         // Modify tasks
-        return
+        var xmlHttp = new XMLHttpRequest();
+        if (task === null && task_details !== null){
+            xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/"+ id + "/det?d=" + task_details, false);
+        }
+        else{
+            if (task !== null && task_details === null){
+                xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/"+ id + "/det?t=" + task, false);
+            }
+            else{
+                return 
+            }
+        }
+        xmlHttp.send(null);
+        if (xmlHttp.responseText !== 'ok'){
+            // if error send again
+            get_post_server(type=type, id=id, task=task, task_details=task_details);
+        }
     }
     if (type === 4){
         // Get all task from flask
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/all", false);
         xmlHttp.send(null);
-        populate(xmlHttp.responseText);
+        json_obj = JSON.parse(xmlHttp.response);
+        populate(json_obj);
+    }
+    if (type === 5){
+        // Delete task
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/delete/"+ id, false);
+        xmlHttp.send(null);
+        if (xmlHttp.response !== 'ok'){
+            get_post_server(type=type, id=id);
+        }
     }
 }
