@@ -33,6 +33,8 @@ var deleted_task_stack = [];
 // array to store id of tasks, used in localstorage of extra details
 var available_tasks = [];
 var session_id = 0;
+// Array to save data when server disconnected
+var send_when_connected = [];
 
 // Check for session
 try {
@@ -58,7 +60,7 @@ try {
     }
 }
 catch(err) {
-    show_toast(err);
+    show_toast('Server Down');
 }
 
 /* 
@@ -82,7 +84,7 @@ catch(err) {
  * @param {string} extra_details - Extra details needed for a task 
  * @param {Number} id - ID of the task
  */
-function add_task(extra_details = null, id = null){
+function add_task(extra_details=null, id=null){
     if (id === null){
         // Task was given by user
         var i = window.value;
@@ -115,7 +117,7 @@ function add_task(extra_details = null, id = null){
         </h3>
         <div id="content_`+i+`" class="content_box" style="display: none;">
             <div class="row">
-                <div class="col s10">
+                <div class="col s11">
                 `;
     if (extra_details === null) {
         newTask = newTask + `<input id="textarea_`+i+`" class="textbox" styl="border: none !important;" placeholder="Add more details"></input>`;
@@ -125,8 +127,10 @@ function add_task(extra_details = null, id = null){
     }               
     newTask = newTask + `
                 </div>
-                <div class="col s2">
-                    extra
+                <div class="col s1">
+                    <button class="btn-floating waves-effect waves-light" style="background-color: #006494;">
+                        <i class="fa fa-clock-o"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -134,7 +138,7 @@ function add_task(extra_details = null, id = null){
     document.getElementById('task_space').innerHTML = prev + newTask;
     // Sending data to server
     if (extra_details === null){   
-        get_post_server(type = 2, id = i, task = task)
+        get_post_server(type = 2, id = i, task = task);
     }
     else{
         get_post_server(type = 2, id = i, task = task, task_details = extra_details);
@@ -149,6 +153,7 @@ function add_task(extra_details = null, id = null){
     available_tasks.push(i);
     // Used to fix ISSUE: 1
     if (extra_details === null){
+        localStorage.setItem("textarea_"+i, '');
         add_text_area_details();
     }
     else{
@@ -369,7 +374,7 @@ function populate(all_tasks) {
             var task_name = all_tasks[id_tasks]['task'];
             var details = null;
         }
-        console.log(id_tasks + " " + task_name + " " + details);
+        // console.log(id_tasks + " " + task_name + " " + details);
         document.getElementById('inp_task').value = task_name;
         add_task(extra_details = details, id = Number(id_tasks));
     }
@@ -405,72 +410,110 @@ function populate(all_tasks) {
  * 'error'  : Something went wrong (check logs)
  */
 function get_post_server(type, id=null, task=null, task_details=null){
-    if (type === 1){
-        // Get session details from flask
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("GET", `http://127.0.0.1:5000/user/""/""/`, false);
-        xmlHttp.send(null);
-        return xmlHttp.responseText;
-    }
-    if (type === 2){
-        // Send task to flask
-        var xmlHttp = new XMLHttpRequest();
-        if (task_details === null){
-            xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/task?id=" + id + "&t=" + task, false);
+    var xmlHttp = new XMLHttpRequest();
+    try{
+        if (type === 1){
+            // Get session details from flask
+            xmlHttp.open("GET", "http://127.0.0.1:5000/user/''/''/", false);
+            xmlHttp.send(null);
+            return xmlHttp.responseText;
         }
-        else{
-            xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/task?id=" + id + "&t=" + task + "&d=" + task_details , false);
-        }
-        xmlHttp.send(null);
-        if (xmlHttp.responseText !== 'ok'){
-            // if error send again
-            get_post_server(type=type, id=id, task=task);
-        }
-    }
-    if (type === 3){
-        // Modify tasks
-        var xmlHttp = new XMLHttpRequest();
-        if (task === null && task_details != null){
-            xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/"+ id + "/det?d=" + task_details, false);
-        }
-        else{
-            if (task != null && task_details === null){
-                xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/"+ id + "/det?t=" + task, false);
+        if (type === 2){
+            // Send task to flask
+            if (task_details === null){
+                xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/task?id=" + id + "&t=" + task, false);
             }
             else{
-                return 
+                xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/task?id=" + id + "&t=" + task + "&d=" + task_details , false);
             }
+            xmlHttp.send(null);
+            if (xmlHttp.responseText != 'ok'){
+                throw "Server offline";
+            }
+            // Goes into Infinite Loop if server down / Connection lost
+            // if (xmlHttp.responseText !== 'ok'){
+            //     // if error send again
+            //     //get_post_server(type=type, id=id, task=task);
+            // }
         }
-        xmlHttp.send(null);
-        if (xmlHttp.responseText !== 'ok'){
-            // if error send again
-            get_post_server(type=type, id=id, task=task, task_details=task_details);
+        if (type === 3){
+            // Modify tasks
+            if (task === null && task_details !== null){
+                xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/"+ id + "/det?d=" + task_details, false);
+            }
+            else{
+                if (task !== null && task_details === null){
+                    xmlHttp.open("POST", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/"+ id + "/det?t=" + task, false);
+                }
+                else{
+                    return ;
+                }
+            }
+            xmlHttp.send(null);
+            if (xmlHttp.responseText != 'ok'){
+                throw "Server offline";
+            }
+            // Goes into Infinite Loop if server down / Connection lost
+            // if (xmlHttp.responseText !== 'ok'){
+            //     // if error send again
+            //     send_when_connected.push([type, id, task, task_details]);
+            //     //get_post_server(type=type, id=id, task=task, task_details=task_details);
+            // }
+        }
+        if (type === 4){
+            // Get all task from flask
+            xmlHttp.open("GET", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/all", false);
+            xmlHttp.send(null);
+            json_obj = JSON.parse(xmlHttp.response);
+            populate(json_obj);
+        }
+        if (type === 5){
+            // Delete task
+            xmlHttp.open("GET", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/delete/"+ id, false);
+            xmlHttp.send(null);
+            if (xmlHttp.responseText != 'ok'){
+                throw "Server offline";
+            }
+            // Goes into Infinite Loop if server down / Connection lost
+            // if (xmlHttp.response !== 'ok'){
+            //     get_post_server(type=type, id=id);
+            // }
         }
     }
-    if (type === 4){
-        // Get all task from flask
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("GET", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/all", false);
-        xmlHttp.send(null);
-        json_obj = JSON.parse(xmlHttp.response);
-        populate(json_obj);
-    }
-    if (type === 5){
-        // Delete task
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("GET", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/delete/"+ id, false);
-        xmlHttp.send(null);
-        if (xmlHttp.response !== 'ok'){
-            get_post_server(type=type, id=id);
-        }
+    catch(err){
+        console.log(err);
+        send_when_connected.push([type, id, task, task_details]);
     }
 }
 
-// Save / Send data to verify every 30 seconds
-// Not sure if good idea
-/*
-setInterval(function(){ 
-    // function that runs every 30 seconds
-    console.log("To be saved");
+/** 
+ * Checks if Server is connected every 30 seconds
+ * if disconnected
+ */
+var displayed_disconn_flag = true;
+setInterval(function(){
+    try{
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", "http://127.0.0.1:5000/connected", false);
+        xmlHttp.send(null);
+        if (xmlHttp.responseText === 'ok'){
+            show_toast("Server Connected");
+            while(send_when_connected.length > 0){
+                data_to_send = send_when_connected.shift();
+                get_post_server(type=data_to_send[0], id=data_to_send[1], task=data_to_send[2], task_details=data_to_send[3]);
+            }
+            show_toast("Sync Completed !");
+            displayed_disconn_flag = true;
+        }
+        else{
+            if (displayed_disconn_flag){
+                show_toast("Server Disconnected");
+                displayed_disconn_flag = false;
+            }
+        }
+    }
+    catch(err){
+        show_toast("Server Disconnected<br>Content will not be saved");
+        // console.log(send_when_connected);
+    }
 }, 30000);
-*/

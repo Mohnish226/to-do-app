@@ -107,6 +107,16 @@ def profile(username, password):
     return database_handler.check_generate_api(username, password)
 
 
+@app.route('/connected', methods=['GET'])
+def connected():
+    """ Check if frontend is connected to flask app
+
+    Returns:
+        'ok' : Server is up and ready to process
+    """
+    return 'ok'
+
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
