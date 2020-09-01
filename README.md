@@ -2,7 +2,7 @@
 ### Built for MSA Program
 
 1. #### Modify Tasks on the go !! (No need to refresh)
-    * Type your task at 
+    * Type your task at<br>
     <img src="images/add_task.png" width="700"><br>
     Click on `+` sign or just press <kbd>Enter</kbd>
 
@@ -12,7 +12,7 @@
     * To delete a task press on <img src="images/close.png" width="35">
 
     * To Add details to a task press on <img src="images/down_arrow.png" width="35">
-    
+
     * Add extra details in the dropdown box
     <img src="images/task_details.png" width="700">
 
@@ -24,10 +24,14 @@
     * <img src="images/toast_3.png" width="210"/>
 
 1. #### Undo !!
+    Deleted Task reappears (current session)
+
     * Click on <img src="images/undo.png" width="30"/>
+
     * <kbd>Ctrl</kbd> + <kbd>Z</kbd> <img src="images/windows_linux.png" width="55"/>
+
     * <kbd>Cmd</kbd> + <kbd>Z</kbd> <img src="images/apple.png" width="25"/>
 
 1. #### Works Offline !!
     ##### DO NOT CLOSE THE TAB
-    In case if your device gets disconnected the application will sync with the server once connection is established you will see <img src="images/sync_toast.gif" width="100"/> which will indicate that your tasks are being synced with the server</p>
+    In case if your device gets disconnected the application will sync with the server once connection is established you will see <img src="images/sync_toast.gif" width="150"/> which will indicate that your tasks are being synced with the server</p>
