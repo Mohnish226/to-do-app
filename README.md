@@ -3,14 +3,19 @@
 
 1. #### Modify Tasks on the go !! (No need to refresh)
     * Type your task at 
-    <img src="images/add_task.png" width="700">
+    <img src="images/add_task.png" width="700"><br>
     Click on `+` sign or just press <kbd>Enter</kbd>
+
     * Task will look like
     <img src="images/task.png" width="700">
+
     * To delete a task press on <img src="images/close.png" width="35">
+
     * To Add details to a task press on <img src="images/down_arrow.png" width="35">
+    
     * Add extra details in the dropdown box
     <img src="images/task_details.png" width="700">
+
 1. #### Toasts !!
     * <img src="images/toast_0.png" width="200" height="55"/>
     * <img src="images/toast_1.png" width="200" height="55"/>
