@@ -428,7 +428,7 @@ function get_post_server(type, id=null, task=null, task_details=null){
             }
             xmlHttp.send(null);
             if (xmlHttp.responseText != 'ok'){
-                throw "Server offline";
+                throw "Server Not Connected";
             }
             // Goes into Infinite Loop if server down / Connection lost
             // if (xmlHttp.responseText !== 'ok'){
@@ -451,7 +451,7 @@ function get_post_server(type, id=null, task=null, task_details=null){
             }
             xmlHttp.send(null);
             if (xmlHttp.responseText != 'ok'){
-                throw "Server offline";
+                throw "Server Not Connected";
             }
             // Goes into Infinite Loop if server down / Connection lost
             // if (xmlHttp.responseText !== 'ok'){
@@ -464,15 +464,20 @@ function get_post_server(type, id=null, task=null, task_details=null){
             // Get all task from flask
             xmlHttp.open("GET", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/all", false);
             xmlHttp.send(null);
-            json_obj = JSON.parse(xmlHttp.response);
-            populate(json_obj);
+            try{
+                json_obj = JSON.parse(xmlHttp.response);
+                populate(json_obj);
+            }
+            catch(err){
+                throw "Server Not Connected";
+            }
         }
         if (type === 5){
             // Delete task
             xmlHttp.open("GET", "http://127.0.0.1:5000/api/"+ sessionStorage.to_do_app +"/delete/"+ id, false);
             xmlHttp.send(null);
             if (xmlHttp.responseText != 'ok'){
-                throw "Server offline";
+                throw "Server Not Connected";
             }
             // Goes into Infinite Loop if server down / Connection lost
             // if (xmlHttp.response !== 'ok'){
@@ -497,13 +502,15 @@ setInterval(function(){
         xmlHttp.open("GET", "http://127.0.0.1:5000/connected", false);
         xmlHttp.send(null);
         if (xmlHttp.responseText === 'ok'){
-            show_toast("Server Connected");
-            while(send_when_connected.length > 0){
-                data_to_send = send_when_connected.shift();
-                get_post_server(type=data_to_send[0], id=data_to_send[1], task=data_to_send[2], task_details=data_to_send[3]);
+            if (send_when_connected.length > 1){
+                show_toast('Sync <i class="fa fa-refresh fa-spin"></i>');
+                while(send_when_connected.length > 0){
+                    data_to_send = send_when_connected.shift();
+                    get_post_server(type=data_to_send[0], id=data_to_send[1], task=data_to_send[2], task_details=data_to_send[3]);
+                }
+                // show_toast("Sync Completed !");
+                displayed_disconn_flag = true;
             }
-            show_toast("Sync Completed !");
-            displayed_disconn_flag = true;
         }
         else{
             if (displayed_disconn_flag){
@@ -514,6 +521,5 @@ setInterval(function(){
     }
     catch(err){
         show_toast("Server Disconnected<br>Content will not be saved");
-        // console.log(send_when_connected);
     }
 }, 30000);
