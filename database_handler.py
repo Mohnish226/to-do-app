@@ -44,11 +44,13 @@ def get_all_tasks(api_key):
 
 def add_task_details(api_key, task_id, task_main, task_extra=""):
     # Logic to add task into database
-
-    task_data[task_id] = {"task": task_main, "details": task_extra}
-    print("Add Task: ", task_data)
-
-    return True
+    try:
+        task_data[task_id] = {"task": task_main, "details": task_extra}
+        print("Add Task: ", task_data)
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
 def update_task_details(api_key, task_id, task_main=None, task_extra=None):
@@ -69,6 +71,7 @@ def delete_task(api_key, task_id):
     # Logic to delete task
 
     try:
+        print('deleting ', task_id)
         del task_data[task_id]
         print("Delete Task: ", task_data)
         return True

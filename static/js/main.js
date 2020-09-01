@@ -253,7 +253,7 @@ function task_mods(task_id, data){
             }
             else{
                 show_toast('Cannot delete as something in details area');
-                console.log('Cannot delete as something in details area');
+                // console.log('Cannot delete as something in details area');
             }
         }
         else{
@@ -486,7 +486,7 @@ function get_post_server(type, id=null, task=null, task_details=null){
         }
     }
     catch(err){
-        console.log(err);
+        // console.log(err);
         send_when_connected.push([type, id, task, task_details]);
     }
 }
