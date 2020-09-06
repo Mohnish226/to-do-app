@@ -1,10 +1,42 @@
 from flask import Flask, request, jsonify, render_template
 import json
-import database_handler
+import os
+from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
 main_url = 'http://127.0.0.1:5000/'
 
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db?check_same_thread=False'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+
+class User(db.Model):
+    id = db.Column('id', db.Integer, primary_key=True)
+    user = db.Column('user', db.String(30), unique=True, nullable=False)
+    paswrd = db.Column('paswrd', db.String(120), unique=True, nullable=False)
+    sessn = db.Column('sessn', db.String(150), nullable=False)
+
+    def __repr__(self):
+        return '{} {} {} {}'.format(self.id, self.user, self.paswrd, self.sessn)
+
+
+class Tasks(db.Model):
+    ttl = db.Column('total', db.Integer, primary_key=True)
+    id = db.Column('id', db.Integer, nullable=False)
+    task = db.Column('task', db.String(150), nullable=False)
+    details = db.Column('details', db.String(150), nullable=False)
+    sessn = db.Column('sessn', db.String(150), nullable=False)
+    # sessn = db.Column(db.String(150), db.ForeignKey('user.sessn') ,nullable=False)
+
+    def __repr__(self):
+        return '{} {} {} {}'.format(self.id, self.sessn, self.task, self.details)
+
+if not os.path.exists('users.sqlite'):
+    db.create_all()
+
+import database_handler
 
 @app.errorhandler(404)
 def page_not_found_404(e):
