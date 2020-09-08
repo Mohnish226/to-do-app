@@ -153,6 +153,34 @@ def login():
     return render_template('login.html')
 
 
+@app.route('/signup/<username>/<password>/')
+def create_user(username, password):
+    """ Create user
+
+    Args:
+        username (str): plain text username
+        password (str): plain text password
+
+    Returns:
+        Script to redirect to login page
+    """
+    opassword = password
+    password = database_handler.encrypt_digest(password)
+    response = database_handler.register_user(username, password)
+    if response == 'ok':
+        return f"""
+            <script>var timer = setTimeout(function() 
+            {{window.location='{main_url+'login/'+username+'/'+opassword+'/'}'}}, 300);
+            </script>
+            """
+    else:
+        f"""
+        <script>var timer = setTimeout(function() 
+        {{window.location='{main_url+'login?99'}'}}, 300);
+        </script>
+        """
+
+
 @app.route('/login/<username>/<password>/', methods=['GET'])
 def create_session(username, password):
     """ Create Session
@@ -181,7 +209,10 @@ def create_session(username, password):
                 {{window.location='{main_url}'}}, 300);
             </script>"""
     else:
-        return f"Error"
+        return f"""
+            <script>var timer = setTimeout(function() 
+            {{window.location='{main_url+'login?99'}'}}, 300);
+            </script>"""
 
 
 @app.route('/logout')
@@ -197,33 +228,8 @@ def logout():
             sessionStorage.clear();
             var timer = setTimeout(function() 
                 {{window.location='{main_url}'}}, 300);
-            </script>"""
-
-
-@app.route('/signup/<username>/<password>/')
-def create_user(username, password):
-    """ Create user
-
-    Args:
-        username (str): plain text username
-        password (str): plain text password
-
-    Returns:
-        Script to redirect to login page
-    """
-    opassword = password
-    password = database_handler.encrypt_digest(password)
-    response = database_handler.register_user(username, password)
-    if response == 'ok':
-        return f"""
-            <script>var timer = setTimeout(function() 
-            {{window.location='{main_url+'login/'+username+'/'+opassword+'/'}'}}, 300);
-            </script>"""
-    else:
-        f"""
-        <script>var timer = setTimeout(function() 
-        {{window.location='{main_url+'login'}'}}, 300);
-        </script>"""
+            </script>
+            """
 
 
 @app.route('/connected', methods=['GET'])
