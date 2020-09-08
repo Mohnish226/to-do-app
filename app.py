@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, render_template
 import json
 import os
 from flask_sqlalchemy import SQLAlchemy
+import sys
+sys.dont_write_bytecode = True
 
 main_url = 'http://127.0.0.1:5000/'
 
@@ -28,15 +30,16 @@ class Tasks(db.Model):
     task = db.Column('task', db.String(150), nullable=False)
     details = db.Column('details', db.String(150), nullable=False)
     sessn = db.Column('sessn', db.String(150), nullable=False)
-    # sessn = db.Column(db.String(150), db.ForeignKey('user.sessn') ,nullable=False)
 
     def __repr__(self):
         return '{} {} {} {}'.format(self.id, self.sessn, self.task, self.details)
+
 
 if not os.path.exists('users.sqlite'):
     db.create_all()
 
 import database_handler
+
 
 @app.errorhandler(404)
 def page_not_found_404(e):
@@ -65,7 +68,6 @@ def update_task(api_key, task_id):
     if details:
         database_handler.update_task_details(api_key, task_id, task_extra=details)
     elif task_name:
-        print(task_name)
         database_handler.update_task_details(api_key, task_id, task_main=task_name)
     else:
         return 'error'
@@ -92,8 +94,8 @@ def new_task(api_key):
     elif task_id and task:
         database_handler.add_task_details(api_key, task_id, task)
         return 'ok'
-    print(task_id, task, d, api_key)
     return 'error'
+
 
 @app.route('/api/<api_key>/all', methods=['GET'])
 def get_all_tasks(api_key):
@@ -125,6 +127,7 @@ def delete_task(api_key, task_id):
     else:
         return 'error'
 
+
 @app.route('/user/<username>/<password>/', methods=['GET'])
 def profile(username, password):
     """ Profiles
@@ -136,7 +139,91 @@ def profile(username, password):
     Returns:
         api_key: Api key of the user / Generate api key
     """
+    password = database_handler.encrypt_digest(password)
     return database_handler.check_generate_api(username, password)
+
+
+@app.route('/login')
+def login():
+    """ login
+
+    Returns:
+        redirects to login.html
+    """
+    return render_template('login.html')
+
+
+@app.route('/login/<username>/<password>/', methods=['GET'])
+def create_session(username, password):
+    """ Create Session
+
+    Args:
+        username (str): plain text username
+        password (str): plain text password
+
+    Returns:
+        Script that initiates session on your browser
+    """
+    password = database_handler.encrypt_digest(password)
+    present = database_handler.user_present(username, password)
+    if present:
+        sessn = database_handler.check_generate_api(username, password)
+        print(sessn)
+        data = sessn.split('|')
+        return f"""
+            Loading
+            <script>
+            sessionStorage.clear();
+            sessionStorage.to_do_app =  '{data[0]}' ;
+            sessionStorage.to_do_app_value = Number( '{int(data[1])}');
+            window.value=Number( '{int(data[1])}' )
+            var timer = setTimeout(function() 
+                {{window.location='{main_url}'}}, 300);
+            </script>"""
+    else:
+        return f"Error"
+
+
+@app.route('/logout')
+def logout():
+    """ Logout
+
+    Returns:
+        Script that cleares session from browser
+    """
+    return f"""
+            Logging off
+            <script>
+            sessionStorage.clear();
+            var timer = setTimeout(function() 
+                {{window.location='{main_url}'}}, 300);
+            </script>"""
+
+
+@app.route('/signup/<username>/<password>/')
+def create_user(username, password):
+    """ Create user
+
+    Args:
+        username (str): plain text username
+        password (str): plain text password
+
+    Returns:
+        Script to redirect to login page
+    """
+    opassword = password
+    password = database_handler.encrypt_digest(password)
+    response = database_handler.register_user(username, password)
+    if response == 'ok':
+        return f"""
+            <script>var timer = setTimeout(function() 
+            {{window.location='{main_url+'login/'+username+'/'+opassword+'/'}'}}, 300);
+            </script>"""
+    else:
+        f"""
+        <script>var timer = setTimeout(function() 
+        {{window.location='{main_url+'login'}'}}, 300);
+        </script>"""
 
 
 @app.route('/connected', methods=['GET'])
