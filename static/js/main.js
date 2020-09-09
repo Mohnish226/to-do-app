@@ -51,6 +51,7 @@ try {
             // Get from server
             // Receive "API-key|next_task_id"
             var host = window.location.host;
+            console.log(host);
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.open("GET", "http://"+host+"/user/''/''/", false);
             xmlHttp.send(null);
