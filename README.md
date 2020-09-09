@@ -3,16 +3,21 @@
 
 Website: [todo.datascience.app](https://todo.datascience.app)
 Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edge&label=Website:&message=UP&color=success) ![https](https://img.shields.io/static/v1?style=flat&label=HTTPS:&message=Enabled&color=success) ![python](https://img.shields.io/static/v1?style=flat&logo=python&label=Python:&message=3.7.2&color=success)
+Browsers Tested: ![Edge](https://img.shields.io/static/v1?style=flat&logo=Microsoft-edge&label=Edge:&message=Working&color=success) ![Chrome](https://img.shields.io/static/v1?style=flat&logo=google-chrome&label=Chrome:&message=Working&color=success) ![Firefox](https://img.shields.io/static/v1?style=flat&logo=firefox-browser&label=Firefox:&message=Working&color=success) ![Safari](https://img.shields.io/static/v1?style=flat&logo=safari&label=Safari:&message=Working&color=success)
+<!-- Main Server: ![Azure](https://img.shields.io/static/v1?style=flat&logo=Microsoft-azure&label=Hosted:&message=Microsoft%20Azure&color=blue) 
+Backup Server: ![Heroku](https://img.shields.io/static/v1?style=flat&logo=Heroku&label=Hosted:&message=Heroku&color=blueviolet) -->
+
 
 - ### Features
 
     1. #### Modify Tasks on the go !! (No need to refresh)
-        * Type your task at<br>
-        <img src="images/add_task.png" width="700"><br>
-        Click on `+` sign or just press <kbd>Enter</kbd>
+
+        * Type your task at
+            <img src="images/add_task.png" width="700"><br>
+            Click on `+` sign or just press <kbd>Enter &crarr;</kbd>
 
         * Task will look like
-        <img src="images/task.png" width="700">
+            <img src="images/task.png" width="700">
 
         * To delete a task 
             * press on <img src="images/close.png" width="35"> Or 
@@ -21,7 +26,7 @@ Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edg
 
         * To Add details to a task press on <img src="images/down_arrow.png" width="35">
 
-            * Add extra details in the dropdown box
+            Add extra details in the dropdown box
             <img src="images/task_details.png" width="700">
 
     1. #### Toasts !!
@@ -66,24 +71,25 @@ Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edg
 
 - ### Requirements
 
-|Package| Version|
-|----|----|
-| gunicorn | 19.7.1| 
-| Flask | 0.12.2 |
-| flask-sqlalchemy | 2.4.4 |
+    |Package| Version|
+    |----|----|
+    | gunicorn | 19.7.1| 
+    | Flask | 0.12.2 |
+    | flask-sqlalchemy | 2.4.4 |
 
-- ### How to run (local)
+- ### How to run
+
     1. Install all required python packages 
         ```bash
         cd to-do-app/
         pip install -r requirements.txt
         ```
-    1. To run the app (locally)
+    1. To run the app ( local )
         ```bash
         cd to-do-app/
         python app.py
         ```
-    1. To run the app (VPS / Hosting)
+    1. To run the app ( VPS / Hosting )
     Please follow hosting providers method to host flask apps. 
     use command 
         ```bash
@@ -91,9 +97,10 @@ Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edg
         ```
 
 - ### Use app via terminal / Postman
+
     ##### Requires 
     [cURL](https://www.booleanworld.com/curl-command-tutorial-examples/) or [Postman](https://www.postman.com/)
-
+    Please Note you can replace `https://todo.datascience.app` to `http://127.0.0.1:5000` if working locally
     1. To check if server is online run
         * Terminal
             ```bash
@@ -112,6 +119,7 @@ Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edg
             `GET` request to `https://todo.datascience.app/user/<username>/<password>/`
 
         returns data in the form `<api-key>|<next-task-id>`
+
         Example:
         ```bash
         cabd6c91-0baa-4a55-99d7-1b8f1d15c1e7|1
@@ -125,6 +133,7 @@ Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edg
             `GET` request to `https://todo.datascience.app/api/<api-key>/all`
 
         It will return all tasks in json in the format 
+
         ```bash
         {'<task_id>' : {
             'task': '<your task>',
@@ -132,6 +141,7 @@ Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edg
             }
         }
         ```
+
         Example
         ```bash
         {'1':
@@ -142,15 +152,18 @@ Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edg
         }
         ```
     1. To add task for a user
+
         Keys
         `id` : Task Id 
         `t` : Main task text 
         `d` : Task details (Optional)
+
         * Terminal
             ```bash
             curl --data "id=<task_id>&t=<task_main_detail>&d=<extra_task_details>" "https://todo.datascience.app/api/<api-key>/task"
             ```
         * Postman
+
             `Post` request to `https://todo.datascience.app/api/<api-key>/task` with above the mentioned key and their values
             
 
@@ -159,10 +172,13 @@ Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edg
         `error` : Did not execute
 
     1. To Modify task
+
         Keys (include atleast 1)
         `t` : Main task text 
         `d` : Task details
+
         (please replace `<api-key>` with your api and `<task-id>` with your task ID)
+
         * Terminal
             ```bash
             curl --data "t=<task_main_detail>&d=<extra_task_details>" "https://todo.datascience.app/api/<api-key>/<task-id>/det"
@@ -185,4 +201,5 @@ Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edg
 
 - ### Known Issues
     - Typing can get slow if server gets overloaded
-    - Extra task details get cleared sometimes (may be due to different browsers) when working offline
+    - Extra task details get cleared sometimes when working offline
+        (may be due to different browsers)
