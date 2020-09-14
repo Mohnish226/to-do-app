@@ -108,55 +108,97 @@ Browsers Tested: ![Edge](https://img.shields.io/static/v1?style=flat&logo=Micros
 
     ##### Requires 
     [cURL](https://www.booleanworld.com/curl-command-tutorial-examples/) or [Postman](https://www.postman.com/)
+
     <br>
+    
     Please Note you can replace `<url>` with 
     - `https://todo.datascience.app` if using the hosted server
     - `http://127.0.0.1:5000` if working locally
+    
     <br>
+    
     1. To check if server is online run
+        
         <br>
+        
         * Terminal
             ```bash
             curl '<url>/connected'
             ```
-        * Postman<br>
-            `GET` request to `<url>/connected`
+        * Postman
+        
         <br>
+        
+            `GET` request to `<url>/connected`
+        
+        <br>
+        
         * Returns:
             * `ok` means server is UP
+        
         <br>
-    1. Create / Get user API and next task  number<br>
+    
+    1. Create / Get user API and next task  number
+
+        <br>
+
         (please replace `<username>` with your username and `<password>` with your password)
+        
         <br>
+        
         * Terminal
             ```bash
             curl '<url>/user/<username>/<password>/'
             ```
+
             <br>
-        * Postman<br>
+        
+        * Postman
+
+            <br>
+
             `GET` request to `<url>/user/<username>/<password>/`
+
             <br>
-        * Returns:<br>
+
+        * Returns:
+
+            <br>
+
             Data in the form `<api-key>|<next-task-id>`
-        <br>
+            
+            <br>
 
         Example:
         ```bash
         cabd6c91-0baa-4a55-99d7-1b8f1d15c1e7|1
         ```
+        
         <br>
+
     1. To get all task from a user
+        
         <br>
+        
         * Terminal
             ```bash
             curl '<url>/api/<api-key>/all'
             ```
-            <br>
-        * Postman<br>
-            `GET` request to `<url>/api/<api-key>/all`
+        
         <br>
         
-        * Returns:<br> 
+        * Postman
+
+            <br>
+
+            `GET` request to `<url>/api/<api-key>/all`
+
+            <br>
+        
+        * Returns:
+
+            <br> 
+        
             All tasks in json in the format 
 
             ```bash
@@ -182,20 +224,30 @@ Browsers Tested: ![Edge](https://img.shields.io/static/v1?style=flat&logo=Micros
         `id` : Task Id 
         `t` : Main task text 
         `d` : Task details (Optional)
+
         <br>
+        
         * Terminal
             ```bash
             curl --data "id=<task_id>&t=<task_main_detail>&d=<extra_task_details>" "<url>/api/<api-key>/task"
             ```
+
             <br>
-        * Postman<br>
+        
+        * Postman
+
+            <br>
 
             `Post` request to `<url>/api/<api-key>/task` with above the mentioned key and their values
-        <br>
+                    
+            <br>
+        
         * Returns: 
         `ok` : Executed successfully
         `error` : Did not execute
+        
         <br>
+    
     1. To Modify task
 
         Keys (include atleast 1)
@@ -203,38 +255,60 @@ Browsers Tested: ![Edge](https://img.shields.io/static/v1?style=flat&logo=Micros
         `d` : Task details
 
         (please replace `<api-key>` with your api and `<task-id>` with your task ID)
+        
         <br>
+        
         * Terminal
             ```bash
             curl --data "t=<task_main_detail>&d=<extra_task_details>" "<url>/api/<api-key>/<task-id>/det"
             ```
+            
             <br>
-        * Postman<br>
+
+        * Postman
+
+            <br>
 
             `POST` request to `<url>/api/<api-key>/<task-id>/det` with above the mentioned key and their values
 
             <br>
+
         * Returns:
+
             <br> 
+
             - `ok` : Executed successfully
             - `error` : Did not execute
+
             <br>
     
     1. To delete task
         (please replace `<api-key>` with your api and `<task-id>` with your task ID)
+
         <br>
+
         * Terminal
             ```bash
             curl "<url>/api/<api-key>/delete/<task-id>"
             ```
+
             <br>
-        * Postman<br>
+
+        * Postman
+
+            <br>
+
             `POST` request to `<url>/api/<api-key>/delete/<task-id>`
+            
             <br>
+        
         * Returns:
+
             <br> 
+
             - `ok` : Executed successfully
             - `error` : Did not execute
+
             <br>
 
 - ### Known Issues
