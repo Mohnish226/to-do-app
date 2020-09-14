@@ -4,9 +4,13 @@
 Website: 
 1. [todo.datascience.app](https://todo.datascience.app) ![Heroku](https://img.shields.io/static/v1?style=flat&logo=Heroku&label=Hosted:&message=Heroku&color=blueviolet) ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edge&label=Website:&message=UP&color=success)
 1. [todo1.datascience.app](https://todo1.datascience.app) ![Azure](https://img.shields.io/static/v1?style=flat&logo=Microsoft-azure&label=Hosted:&message=Microsoft%20Azure&color=blue) ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edge&label=Website:&message=DOWN&color=red)
+
 <br>
+
 Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edge&label=Website:&message=UP(1/2)&color=orange) ![https](https://img.shields.io/static/v1?style=flat&label=HTTPS:&message=Enabled&color=success) ![python](https://img.shields.io/static/v1?style=flat&logo=python&label=Python:&message=3.7.2&color=success)
+
 <br>
+
 Browsers Tested: ![Edge](https://img.shields.io/static/v1?style=flat&logo=Microsoft-edge&label=Edge:&message=Working&color=success) ![Chrome](https://img.shields.io/static/v1?style=flat&logo=google-chrome&label=Chrome:&message=Working&color=success) ![Firefox](https://img.shields.io/static/v1?style=flat&logo=firefox-browser&label=Firefox:&message=Working&color=success) ![Safari](https://img.shields.io/static/v1?style=flat&logo=safari&label=Safari:&message=Working&color=success)
 <br>
 
