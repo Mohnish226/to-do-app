@@ -117,8 +117,9 @@ Browsers Tested: ![Edge](https://img.shields.io/static/v1?style=flat&logo=Micros
     
     <br>
     
+
     1. To check if server is online run
-        
+
         <br>
         
         * Terminal
@@ -126,17 +127,20 @@ Browsers Tested: ![Edge](https://img.shields.io/static/v1?style=flat&logo=Micros
             curl '<url>/connected'
             ```
         * Postman
-        
-        <br>
-        
+
+            <br>
+
             `GET` request to `<url>/connected`
-        
-        <br>
+
+            <br>
         
         * Returns:
-            * `ok` means server is UP
-        
-        <br>
+
+            <br>
+
+            `ok` means server is UP
+
+            <br>
     
     1. Create / Get user API and next task  number
 
