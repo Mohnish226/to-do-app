@@ -1,11 +1,15 @@
 # to-do-app
 ### Built for MSA Program
 
-Website: [todo.datascience.app](https://todo.datascience.app)
-Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edge&label=Website:&message=UP&color=success) ![https](https://img.shields.io/static/v1?style=flat&label=HTTPS:&message=Enabled&color=success) ![python](https://img.shields.io/static/v1?style=flat&logo=python&label=Python:&message=3.7.2&color=success)
+Website: 
+1. [todo.datascience.app](https://todo.datascience.app) ![Heroku](https://img.shields.io/static/v1?style=flat&logo=Heroku&label=Hosted:&message=Heroku&color=blueviolet) ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edge&label=Website:&message=UP&color=success)
+1. [todo1.datascience.app](https://todo1.datascience.app) ![Azure](https://img.shields.io/static/v1?style=flat&logo=Microsoft-azure&label=Hosted:&message=Microsoft%20Azure&color=blue) ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edge&label=Website:&message=DOWN&color=red)
+<br>
+Status: ![status](https://img.shields.io/static/v1?style=flat&logo=microsoft-edge&label=Website:&message=UP(1/2)&color=orange) ![https](https://img.shields.io/static/v1?style=flat&label=HTTPS:&message=Enabled&color=success) ![python](https://img.shields.io/static/v1?style=flat&logo=python&label=Python:&message=3.7.2&color=success)
+<br>
 Browsers Tested: ![Edge](https://img.shields.io/static/v1?style=flat&logo=Microsoft-edge&label=Edge:&message=Working&color=success) ![Chrome](https://img.shields.io/static/v1?style=flat&logo=google-chrome&label=Chrome:&message=Working&color=success) ![Firefox](https://img.shields.io/static/v1?style=flat&logo=firefox-browser&label=Firefox:&message=Working&color=success) ![Safari](https://img.shields.io/static/v1?style=flat&logo=safari&label=Safari:&message=Working&color=success)
-<!-- Main Server: ![Azure](https://img.shields.io/static/v1?style=flat&logo=Microsoft-azure&label=Hosted:&message=Microsoft%20Azure&color=blue) 
-Backup Server: ![Heroku](https://img.shields.io/static/v1?style=flat&logo=Heroku&label=Hosted:&message=Heroku&color=blueviolet) -->
+<br>
+
 
 
 - ### Features
@@ -93,54 +97,71 @@ Backup Server: ![Heroku](https://img.shields.io/static/v1?style=flat&logo=Heroku
     Please follow hosting providers method to host flask apps. 
     use command 
         ```bash
-        gunicorn --bind 0.0.0.:$PORT app:app
+        gunicorn --bind 0.0.0.0:$PORT app:app
         ```
 
 - ### Use app via terminal / Postman
 
     ##### Requires 
     [cURL](https://www.booleanworld.com/curl-command-tutorial-examples/) or [Postman](https://www.postman.com/)
-    Please Note you can replace `https://todo.datascience.app` to `http://127.0.0.1:5000` if working locally
+    <br>
+    Please Note you can replace `<url>` with 
+    - `https://todo.datascience.app` if using the hosted server
+    - `http://127.0.0.1:5000` if working locally
+    <br>
     1. To check if server is online run
+        <br>
         * Terminal
             ```bash
-            curl 'https://todo.datascience.app/connected'
+            curl '<url>/connected'
             ```
-        * Postman
-            `GET` request to `https://todo.datascience.app/connected`
-        If it returns `ok` means server is UP
-    1. Create / Get user API and next task  number
+        * Postman<br>
+            `GET` request to `<url>/connected`
+        <br>
+        * Returns:
+            * `ok` means server is UP
+        <br>
+    1. Create / Get user API and next task  number<br>
         (please replace `<username>` with your username and `<password>` with your password)
+        <br>
         * Terminal
             ```bash
-            curl 'https://todo.datascience.app/user/<username>/<password>/'
+            curl '<url>/user/<username>/<password>/'
             ```
-        * Postman
-            `GET` request to `https://todo.datascience.app/user/<username>/<password>/`
-
-        returns data in the form `<api-key>|<next-task-id>`
+            <br>
+        * Postman<br>
+            `GET` request to `<url>/user/<username>/<password>/`
+            <br>
+        * Returns:<br>
+            Data in the form `<api-key>|<next-task-id>`
+        <br>
 
         Example:
         ```bash
         cabd6c91-0baa-4a55-99d7-1b8f1d15c1e7|1
         ```
+        <br>
     1. To get all task from a user
+        <br>
         * Terminal
             ```bash
-            curl 'https://todo.datascience.app/api/<api-key>/all'
+            curl '<url>/api/<api-key>/all'
             ```
-        * Postman
-            `GET` request to `https://todo.datascience.app/api/<api-key>/all`
+            <br>
+        * Postman<br>
+            `GET` request to `<url>/api/<api-key>/all`
+        <br>
+        
+        * Returns:<br> 
+            All tasks in json in the format 
 
-        It will return all tasks in json in the format 
-
-        ```bash
-        {'<task_id>' : {
-            'task': '<your task>',
-            'details': '<task details>'
+            ```bash
+            {'<task_id>' : {
+                'task': '<your task>',
+                'details': '<task details>'
+                }
             }
-        }
-        ```
+            ```
 
         Example
         ```bash
@@ -157,20 +178,20 @@ Backup Server: ![Heroku](https://img.shields.io/static/v1?style=flat&logo=Heroku
         `id` : Task Id 
         `t` : Main task text 
         `d` : Task details (Optional)
-
+        <br>
         * Terminal
             ```bash
-            curl --data "id=<task_id>&t=<task_main_detail>&d=<extra_task_details>" "https://todo.datascience.app/api/<api-key>/task"
+            curl --data "id=<task_id>&t=<task_main_detail>&d=<extra_task_details>" "<url>/api/<api-key>/task"
             ```
-        * Postman
+            <br>
+        * Postman<br>
 
-            `Post` request to `https://todo.datascience.app/api/<api-key>/task` with above the mentioned key and their values
-            
-
-        Will return 
+            `Post` request to `<url>/api/<api-key>/task` with above the mentioned key and their values
+        <br>
+        * Returns: 
         `ok` : Executed successfully
         `error` : Did not execute
-
+        <br>
     1. To Modify task
 
         Keys (include atleast 1)
@@ -178,28 +199,44 @@ Backup Server: ![Heroku](https://img.shields.io/static/v1?style=flat&logo=Heroku
         `d` : Task details
 
         (please replace `<api-key>` with your api and `<task-id>` with your task ID)
-
+        <br>
         * Terminal
             ```bash
-            curl --data "t=<task_main_detail>&d=<extra_task_details>" "https://todo.datascience.app/api/<api-key>/<task-id>/det"
+            curl --data "t=<task_main_detail>&d=<extra_task_details>" "<url>/api/<api-key>/<task-id>/det"
             ```
-        * Postman
-            `POST` request to `https://todo.datascience.app/api/<api-key>/<task-id>/det` with above the mentioned key and their values
+            <br>
+        * Postman<br>
 
-        Will return 
-        `ok` : Executed successfully
-        `error` : Did not execute
+            `POST` request to `<url>/api/<api-key>/<task-id>/det` with above the mentioned key and their values
+
+            <br>
+        * Returns:
+            <br> 
+            - `ok` : Executed successfully
+            - `error` : Did not execute
+            <br>
     
     1. To delete task
         (please replace `<api-key>` with your api and `<task-id>` with your task ID)
+        <br>
         * Terminal
             ```bash
-            curl "https://todo.datascience.app/api/<api-key>/delete/<task-id>"
+            curl "<url>/api/<api-key>/delete/<task-id>"
             ```
-        * Postman
-            `POST` request to `https://todo.datascience.app/api/<api-key>/delete/<task-id>`
+            <br>
+        * Postman<br>
+            `POST` request to `<url>/api/<api-key>/delete/<task-id>`
+            <br>
+        * Returns:
+            <br> 
+            - `ok` : Executed successfully
+            - `error` : Did not execute
+            <br>
 
 - ### Known Issues
     - Typing can get slow if server gets overloaded
     - Extra task details get cleared sometimes when working offline
         (may be due to different browsers)
+
+- ### Note:
+    - This repository contains files to run/host locally, you will need to do changes according to the hosting provider.
